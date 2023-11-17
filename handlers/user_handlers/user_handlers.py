@@ -50,7 +50,6 @@ async def disagree_handler(callback_query: types.CallbackQuery, state: FSMContex
         from_user_name = callback_query.from_user.first_name  # Получаем фамилию пользователя
         greeting_message = (f"{from_user_name}, Вас приветствует чат-бот")
         keyboards_greeting = create_greeting_keyboard()  # Клавиатуры поста приветствия 👋
-        # with open("media/photos/logo.jpg", "rb") as photo_file:
         await bot.send_message(callback_query.from_user.id,  # ID пользователя
                                  # photo=types.InputFile(photo_file),  # Изображение в посте приветствия 👋
                                  caption=greeting_message,  # Текст для приветствия 👋
