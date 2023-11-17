@@ -10,47 +10,14 @@ def create_greeting_keyboard():
     return greeting_keyboard
 
 
-def stock_keyboard():
-    """Клавиатура с акциями"""
-    stock_keyboard = InlineKeyboardMarkup()
-    happy_parents_button = InlineKeyboardButton(text="Счастливые родители", callback_data='happy_parents')
-    second_opinion_of_fertility_specialists = InlineKeyboardButton(text="Второе мнение репродуктологов БЕСПЛАТНО", callback_data='second_opinion_of_fertility_specialists')
-    the_second_opinion_of_the_operators = InlineKeyboardButton(text="Второе мнение оперирующих гинекологов БЕСПЛАТНО", callback_data='the_second_opinion_of_the_operators')
-    stock_keyboard.row(happy_parents_button)
-    stock_keyboard.row(second_opinion_of_fertility_specialists)
-    stock_keyboard.row(the_second_opinion_of_the_operators)
-    return stock_keyboard
-
-
-def create_my_details_keyboard():
-    """Создает клавиатуру для кнопки 'Мои данные'"""
-    my_details_keyboard = InlineKeyboardMarkup()
-    my_details_button = InlineKeyboardButton(text='Мои данные', callback_data='my_details')
-
-    my_details_keyboard.row(my_details_button)  # Связаться с оператором
-    return my_details_keyboard
-
-
 def create_sign_up_keyboard():
     """Создает клавиатуру для кнопок 'Согласен' и 'Не согласен'"""
     sign_up_keyboard = InlineKeyboardMarkup()
-    agree_button = InlineKeyboardButton(text='👍 Согласен', callback_data='agree')
-    disagree_button = InlineKeyboardButton(text='👎 Не согласен', callback_data='disagree')
+    agree_button = InlineKeyboardButton(text='👍 Согласен(а)', callback_data='agree')
+    disagree_button = InlineKeyboardButton(text='👎 Не согласен(а)', callback_data='disagree')
 
     sign_up_keyboard.row(agree_button, disagree_button)
     return sign_up_keyboard
-
-
-def appointment_selection_keypad():
-    """Создает клавиатуру для выбора способа связи"""
-    appointment_selection_key = InlineKeyboardMarkup()
-    call_button = InlineKeyboardButton(text="Позвонить", callback_data="call_us")
-    callback_button = InlineKeyboardButton(text="Заказать обратный звонок", callback_data="callback_key")
-    chat_with_operator_button = InlineKeyboardButton(text="Чат с оператором", url="https://t.me/pk_alina")
-
-    appointment_selection_key.row(call_button, callback_button)
-    appointment_selection_key.row(chat_with_operator_button)
-    return appointment_selection_key
 
 
 def create_contact_keyboard():
@@ -77,11 +44,19 @@ def create_data_modification_keyboard():
     return data_modification_keyboard
 
 
+def subscription_keyboard():
+    """Клавиатура подписки"""
+    subscription_keyboars = InlineKeyboardMarkup()
+    subscribe_button = InlineKeyboardButton("Подписаться", url="https://t.me/tea_flow")
+    i_subscribed_button = InlineKeyboardButton("Я подписался", callback_data="i_subscribed")
+    subscription_keyboars.row(subscribe_button)
+    subscription_keyboars.row(i_subscribed_button)
+    return subscription_keyboars
+
+
 if __name__ == '__main__':
     create_greeting_keyboard()
     create_sign_up_keyboard()
-    appointment_selection_keypad()
     create_contact_keyboard()
-    create_my_details_keyboard()
     create_data_modification_keyboard()
-    stock_keyboard()
+    subscription_keyboard()  # Клавиатура подписки
