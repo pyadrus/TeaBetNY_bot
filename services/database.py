@@ -7,7 +7,6 @@ def get_user_data_from_db(user_id):
     cursor.execute('''CREATE TABLE IF NOT EXISTS users (user_id INTEGER,
                                                         name TEXT,
                                                         surname TEXT,
-                                                        city TEXT,
                                                         phone_number TEXT,
                                                         registration_date TEXT)''')
     # Выполните SQL-запрос для получения данных о пользователе по его user_id
@@ -16,9 +15,8 @@ def get_user_data_from_db(user_id):
     conn.close()
     # Верните данные о пользователе как словарь, если они существуют, или None, если пользователя нет
     if user_data:
-        _, name, surname, city, phone_number, registration_date = user_data
-        return {'name': name, 'surname': surname, 'city': city, 'phone_number': phone_number,
-                'registration_date': registration_date}
+        _, name, surname, phone_number, registration_date = user_data
+        return {'name': name, 'surname': surname, 'phone_number': phone_number, 'registration_date': registration_date}
     else:
         return None
 
@@ -34,8 +32,8 @@ def fetch_user_data_from_db(user_id):
 
     # Верните данные о пользователе как словарь, если они существуют, или None, если пользователя нет
     if user_data:
-        user_id, name, surname, city, phone_number, registration_date = user_data
-        return {'user_id': user_id, 'name': name, 'surname': surname, 'city': city, 'phone_number': phone_number,
+        user_id, name, surname, phone_number, registration_date = user_data
+        return {'user_id': user_id, 'name': name, 'surname': surname, 'phone_number': phone_number,
                 'registration_date': registration_date}
     else:
         return None
@@ -106,7 +104,7 @@ def update_phone_in_db(user_id, new_phone):
         return False  # Возвращаем False в случае ошибки
 
 
-def insert_user_data_to_database(user_id, name, surname, city, phone_number, registration_date):
+def insert_user_data_to_database(user_id, name, surname, phone_number, registration_date):
     """Записывает данные пользователя в базу данных"""
     try:
         conn = sqlite3.connect("your_database.db")  # Замените "your_database.db" на имя вашей базы данных
@@ -114,12 +112,11 @@ def insert_user_data_to_database(user_id, name, surname, city, phone_number, reg
         cursor.execute('''CREATE TABLE IF NOT EXISTS users (user_id INTEGER,
                                                             name TEXT,
                                                             surname TEXT,
-                                                            city TEXT,
                                                             phone_number TEXT,
                                                             registration_date TEXT)''')
-        cursor.execute("INSERT INTO users (user_id, name, surname, city, phone_number, registration_date) "
-                       "VALUES (?, ?, ?, ?, ?, ?)",
-                       (user_id, name, surname, city, phone_number, registration_date))
+        cursor.execute("INSERT INTO users (user_id, name, surname, phone_number, registration_date) "
+                       "VALUES (?, ?, ?, ?, ?)",
+                       (user_id, name, surname, phone_number, registration_date))
         conn.commit()
     except sqlite3.Error as e:
         print(f"Ошибка при записи данных в базу данных: {e}")

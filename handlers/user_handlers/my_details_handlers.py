@@ -8,7 +8,7 @@ from aiogram.types import ParseMode
 from keyboards.user_keyboards import create_sign_up_keyboard, create_data_modification_keyboard, \
     create_contact_keyboard
 from messages.user_messages import sign_up_text
-from services.database import update_name_in_db, update_surname_in_db, update_city_in_db, get_user_data_from_db, \
+from services.database import update_name_in_db, update_surname_in_db, get_user_data_from_db, \
     update_phone_in_db, insert_user_data_to_database
 from system.dispatcher import dp, bot
 
@@ -18,7 +18,6 @@ class MakingAnOrder(StatesGroup):
     write_name = State()  # Имя
     write_surname = State()  # Фамилия
     phone_input = State()  # Передача номера телефона кнопкой
-    write_city = State()  # Запись города
 
 
 class ChangingData(StatesGroup):
@@ -26,7 +25,6 @@ class ChangingData(StatesGroup):
     changing_name = State()  # Имя
     changing_surname = State()  # Фамилия
     changing_phone = State()  # Передача номера телефона кнопкой
-    changing_city = State()  # Запись города
 
 
 @dp.callback_query_handler(lambda c: c.data == "my_details")
@@ -38,7 +36,6 @@ async def call_us_handler(callback_query: types.CallbackQuery, state: FSMContext
         # Если данные о пользователе найдены в базе данных, отобразите их
         name = user_data.get('name', 'не указано')
         surname = user_data.get('surname', 'не указано')
-        city = user_data.get('city', 'не указано')
         phone_number = user_data.get('phone_number', 'не указано')
         registration_date = user_data.get('registration_date')
 
@@ -46,7 +43,6 @@ async def call_us_handler(callback_query: types.CallbackQuery, state: FSMContext
                     "Ваши данные:\n\n"
                     f"✅ <b>Имя:</b> {name}\n"
                     f"✅ <b>Фамилия:</b> {surname}\n"
-                    f"✅ <b>Город:</b> {city}\n"
                     f"✅ <b>Номер телефона:</b> {phone_number}\n"
                     f"✅ <b>Дата регистрации:</b> {registration_date}\n\n")
         edit_data_keyboard = create_data_modification_keyboard()
@@ -110,30 +106,6 @@ async def process_entered_edit_surname(message: types.Message, state: FSMContext
         await state.finish()
 
 
-@dp.callback_query_handler(lambda c: c.data == "edit_city")
-async def edit_city_handler(callback_query: types.CallbackQuery):
-    # Отправляем сообщение с запросом на ввод нового имени и включаем состояние
-    await bot.send_message(callback_query.from_user.id, "Введите новый город:")
-    await ChangingData.changing_city.set()
-
-
-@dp.message_handler(state=ChangingData.changing_city)
-async def process_entered_edit_city(message: types.Message, state: FSMContext):
-    async with state.proxy() as data:
-        user_id = message.from_user.id
-        new_city = message.text
-        if update_city_in_db(user_id, new_city):
-            text_city = f"✅ Город успешно изменен на {new_city} ✅\n\n" \
-                        "Для возврата нажмите /start"
-            await bot.send_message(user_id, text_city)
-        else:
-            text_city = "❌ Произошла ошибка при изменении города ❌\n\n" \
-                        "Для возврата нажмите /start"
-            await bot.send_message(user_id, text_city)
-        # Завершаем состояние после изменения имени
-        await state.finish()
-
-
 @dp.callback_query_handler(lambda c: c.data == "edit_phone")
 async def edit_city_handler(callback_query: types.CallbackQuery):
     # Отправляем сообщение с запросом на ввод нового имени и включаем состояние
@@ -178,19 +150,9 @@ async def write_surname_handler(message: types.Message, state: FSMContext):
 
 
 @dp.message_handler(state=MakingAnOrder.write_name)
-async def write_city_handlers(message: types.Message, state: FSMContext):
-    name = message.text
-    await state.update_data(name=name)
-    await MakingAnOrder.write_city.set()
-    text_mes = ("🏙️ Введите ваш город (желательно кириллицей):\n"
-                "Пример: Москва, Санкт-Петербург")
-    await bot.send_message(message.from_user.id, text_mes)
-
-
-@dp.message_handler(state=MakingAnOrder.write_city)
 async def write_name_handler(message: types.Message, state: FSMContext):
-    city = message.text
-    await state.update_data(city=city)
+    name = message.text
+    await state.update_data(city=name)
     sign_up_texts = (
         "Для ввода номера телефона вы можете поделиться номером телефона, нажав на кнопку или ввести его вручную.\n\n"
         "Чтобы ввести номер вручную, просто отправьте его в текстовом поле.")
@@ -219,26 +181,22 @@ async def handle_phone_text(message: types.Message, state: FSMContext):
 async def handle_confirmation(message: types.Message, state: FSMContext):
     markup = types.ReplyKeyboardRemove(selective=False)  # Remove the keyboard
     await message.answer("Спасибо за предоставленные данные.", reply_markup=markup)
-    # Извлечение пользовательских данных из состояния
-    user_data = await state.get_data()
+    user_data = await state.get_data()  # Извлечение пользовательских данных из состояния
     surname = user_data.get('surname', 'не указан')
     name = user_data.get('name', 'не указан')
     phone_number = user_data.get('phone_number', 'не указан')
-    city = user_data.get('city', 'не указан')
     registration_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    # Получение ID аккаунта Telegram
-    user_id = message.from_user.id
+    user_id = message.from_user.id  # Получение ID аккаунта Telegram
     # Составьте подтверждающее сообщение
     text_mes = (f"🤝 Рады познакомиться {name} {surname}! 🤝\n"
                 "Ваши регистрационные данные:\n\n"
                 f"✅ <b>Ваше Имя:</b> {name}\n"
                 f"✅ <b>Ваша Фамилия:</b> {surname}\n"
-                f"✅ <b>Ваш Город:</b> {city}\n"
                 f"✅ <b>Ваш номер телефона:</b> {phone_number}\n"
                 f"✅ <b>Ваша Дата регистрации:</b> {registration_date}\n\n"
                 "Вы можете изменить свои данные в меню \"Мои данные\".\n\n"
                 "Для возврата нажмите /start")
-    insert_user_data_to_database(user_id, name, surname, city, phone_number, registration_date)
+    insert_user_data_to_database(user_id, name, surname, phone_number, registration_date)
     await state.finish()  # Завершаем текущее состояние машины состояний
     await state.reset_state()  # Сбрасываем все данные машины состояний, до значения по умолчанию
     # Создаем клавиатуру с помощью my_details() (предполагается, что она существует)

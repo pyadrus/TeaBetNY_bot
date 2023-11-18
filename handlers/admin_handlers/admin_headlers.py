@@ -18,7 +18,7 @@ async def send_data_as_excel(message: types.Message):
     cursor.execute("SELECT * FROM users")  # Выполняем SQL-запрос для извлечения данных
     user_data = cursor.fetchall()
     # Заголовки столбцов
-    ws.append(["User ID Telegram", "Имя", "Фамилия", "Город", "Номер телефона", "Дата регистрации"])
+    ws.append(["User ID Telegram", "Имя", "Фамилия", "Номер телефона", "Дата регистрации"])
     for row in user_data:  # Добавляем данные в таблицу
         ws.append(row)
     wb.save(excel_filename)  # Сохраняем книгу Excel
