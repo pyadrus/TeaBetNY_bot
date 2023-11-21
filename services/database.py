@@ -1,24 +1,43 @@
 import sqlite3
+from loguru import logger  # Логирование с помощью loguru
+
+table_name = '''CREATE TABLE IF NOT EXISTS users (user_order, user_id, name, surname, phone_number, registration_date)'''
+
+
+def insert_user_data_to_database(user_order, user_id, name, surname, phone_number, registration_date):
+    """Записывает данные пользователя в базу данных"""
+    try:
+        conn = sqlite3.connect("your_database.db")  # Замените "your_database.db" на имя вашей базы данных
+        cursor = conn.cursor()
+        cursor.execute(table_name)
+        cursor.execute("INSERT INTO users (user_order, user_id, name, surname, phone_number, registration_date) "
+                       "VALUES (?, ?, ?, ?, ?, ?)",
+                       (user_order, user_id, name, surname, phone_number, registration_date))
+        conn.commit()
+    except sqlite3.Error as e:
+        logger.info(f"Ошибка при записи данных в базу данных: {e}")
+    finally:
+        conn.close()
 
 
 def get_user_data_from_db(user_id):
-    conn = sqlite3.connect("your_database.db")  # Замените "your_database.db" на имя вашей базы данных
-    cursor = conn.cursor()
-    cursor.execute('''CREATE TABLE IF NOT EXISTS users (user_id INTEGER,
-                                                        name TEXT,
-                                                        surname TEXT,
-                                                        phone_number TEXT,
-                                                        registration_date TEXT)''')
-    # Выполните SQL-запрос для получения данных о пользователе по его user_id
-    cursor.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
-    user_data = cursor.fetchone()  # Получите данные первой найденной записи
-    conn.close()
-    # Верните данные о пользователе как словарь, если они существуют, или None, если пользователя нет
-    if user_data:
-        _, name, surname, phone_number, registration_date = user_data
-        return {'name': name, 'surname': surname, 'phone_number': phone_number, 'registration_date': registration_date}
-    else:
-        return None
+    try:
+        conn = sqlite3.connect("your_database.db")  # Замените "your_database.db" на имя вашей базы данных
+        cursor = conn.cursor()
+        cursor.execute(table_name)
+        # Выполните SQL-запрос для получения данных о пользователе по его user_id
+        cursor.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
+        user_data = cursor.fetchone()  # Получите данные первой найденной записи
+        conn.close()
+        # Верните данные о пользователе как словарь, если они существуют, или None, если пользователя нет
+        if user_data:
+            _, _, name, surname, phone_number, registration_date = user_data
+            return {'name': name, 'surname': surname, 'phone_number': phone_number,
+                    'registration_date': registration_date}
+        else:
+            return None
+    except Exception as e:
+        logger.info(e)
 
 
 def fetch_user_data_from_db(user_id):
@@ -52,7 +71,7 @@ def update_name_in_db(user_id, new_name):
         conn.close()  # Закрываем соединение с базой данных
         return True  # Возвращаем True в случае успешного обновления
     except Exception as e:
-        print("Ошибка при обновлении имени:", str(e))
+        logger.info("Ошибка при обновлении имени:", str(e))
         return False  # Возвращаем False в случае ошибки
 
 
@@ -68,7 +87,7 @@ def update_surname_in_db(user_id, new_surname):
         conn.close()  # Закрываем соединение с базой данных
         return True  # Возвращаем True в случае успешного обновления
     except Exception as e:
-        print("Ошибка при обновлении фамилии:", str(e))
+        logger.info("Ошибка при обновлении фамилии:", str(e))
         return False  # Возвращаем False в случае ошибки
 
 
@@ -84,7 +103,7 @@ def update_city_in_db(user_id, new_city):
         conn.close()  # Закрываем соединение с базой данных
         return True  # Возвращаем True в случае успешного обновления
     except Exception as e:
-        print("Ошибка при обновлении фамилии:", str(e))
+        logger.info("Ошибка при обновлении фамилии:", str(e))
         return False  # Возвращаем False в случае ошибки
 
 
@@ -100,26 +119,20 @@ def update_phone_in_db(user_id, new_phone):
         conn.close()  # Закрываем соединение с базой данных
         return True  # Возвращаем True в случае успешного обновления
     except Exception as e:
-        print("Ошибка при обновлении фамилии:", str(e))
+        logger.info("Ошибка при обновлении фамилии:", str(e))
         return False  # Возвращаем False в случае ошибки
 
 
-def insert_user_data_to_database(user_id, name, surname, phone_number, registration_date):
-    """Записывает данные пользователя в базу данных"""
+def count_users_by_order():
+    """Возвращает количество пользователей в порядке их добавления"""
     try:
         conn = sqlite3.connect("your_database.db")  # Замените "your_database.db" на имя вашей базы данных
         cursor = conn.cursor()
-        cursor.execute('''CREATE TABLE IF NOT EXISTS users (user_id INTEGER,
-                                                            name TEXT,
-                                                            surname TEXT,
-                                                            phone_number TEXT,
-                                                            registration_date TEXT)''')
-        cursor.execute("INSERT INTO users (user_id, name, surname, phone_number, registration_date) "
-                       "VALUES (?, ?, ?, ?, ?)",
-                       (user_id, name, surname, phone_number, registration_date))
-        conn.commit()
+        cursor.execute("SELECT COUNT(*) FROM users")
+        count = cursor.fetchone()[0]
+        return count
     except sqlite3.Error as e:
-        print(f"Ошибка при записи данных в базу данных: {e}")
+        logger.info(f"Ошибка при чтении данных из базы данных: {e}")
     finally:
         conn.close()
 
