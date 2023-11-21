@@ -60,6 +60,40 @@ async def is_user_subscribed(user_id):
         return False
 
 
+@dp.callback_query_handler(lambda c: c.data == "return_to_start_menu")
+async def return_to_start_menu(callback_query: types.CallbackQuery, state: FSMContext):
+    """Обработчик команды return_to_start_menu, он же пост приветствия 👋"""
+    try:
+        # Получаем информацию о пользователе
+        user_id = callback_query.from_user.id
+        username = callback_query.from_user.username
+        first_name = callback_query.from_user.first_name
+        last_name = callback_query.from_user.last_name
+        logger.info(f"Пользователь нажавший /start: {user_id}, {username}, {first_name}, {last_name}")
+        await state.finish()  # Завершаем текущее состояние машины состояний
+        await state.reset_state()  # Сбрасываем все данные машины состояний, до значения по умолчанию
+        if await is_user_subscribed(user_id):
+            # Проверяем подписку на группу / канал. Например: https://t.me/tea_flow
+            from_user_name = callback_query.from_user.first_name  # Получаем фамилию пользователя
+            greeting_post = (f"Привет, {from_user_name}! 🤖 Добро пожаловать в чат-бот @TeaBetNY_bot!\n\n"
+                             f"Для участия в конкурсе необходимо пройти регистрацию. Вы можете это сделать в разделе <b>'Мои данные'</b>. \n\nЕсли вы уже прошли регистрацию, проверьте введенные данные в разделе <b>'Мои данные'</b>.\n"
+                             f"Ваши данные всегда можно обновить в разделе <b>'Мои данные'</b>. Удачи в конкурсе!")
+
+            keyboards_greeting = create_greeting_keyboard()  # Клавиатуры поста приветствия 👋
+            await bot.send_message(callback_query.from_user.id, greeting_post, reply_markup=keyboards_greeting,
+                                   parse_mode=types.ParseMode.HTML)  # Текст в HTML-разметки
+        else:
+            subscription_keyboars = subscription_keyboard()
+            await bot.send_message(callback_query.from_user.id,"Вас приветствует бот-помощник 🤖 TeaBet для участия в конкурсе.\n\n"
+                                 "Вам необходимо подписаться на канал: https://t.me/tea_flow и оставить свои контактные данные",
+                                 disable_web_page_preview=True,
+                                 reply_markup=subscription_keyboars,
+                                 parse_mode=types.ParseMode.HTML)
+
+    except Exception as error:
+        logger.exception(error)
+
+
 @dp.message_handler(commands=['start'])
 async def greeting(message: types.Message, state: FSMContext):
     """Обработчик команды /start, он же пост приветствия 👋"""
@@ -102,10 +136,10 @@ async def greeting(message: types.Message, state: FSMContext):
         else:
             subscription_keyboars = subscription_keyboard()
             await message.answer("Вас приветствует бот-помощник 🤖 TeaBet для участия в конкурсе.\n\n"
-                                "Вам необходимо подписаться на канал: https://t.me/tea_flow и оставить свои контактные данные",
-                                disable_web_page_preview=True,
-                                reply_markup=subscription_keyboars,
-                                parse_mode=types.ParseMode.HTML)
+                                 "Вам необходимо подписаться на канал: https://t.me/tea_flow и оставить свои контактные данные",
+                                 disable_web_page_preview=True,
+                                 reply_markup=subscription_keyboars,
+                                 parse_mode=types.ParseMode.HTML)
 
     except Exception as error:
         logger.exception(error)

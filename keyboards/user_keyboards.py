@@ -35,7 +35,7 @@ def create_data_modification_keyboard():
     edit_name_button = InlineKeyboardButton("✏️Изменить Имя", callback_data="edit_name")
     edit_surname_button = InlineKeyboardButton("✏️Изменить Фамилию", callback_data="edit_surname")
     edit_phone_button = InlineKeyboardButton("✏️Изменить Номер 📱 ", callback_data="edit_phone")
-    start_button = InlineKeyboardButton("↩️ Вернуться в начальное меню", callback_data="disagree")
+    start_button = InlineKeyboardButton("↩️ Вернуться в начальное меню", callback_data="return_to_start_menu")
 
     data_modification_keyboard.row(edit_name_button)
     data_modification_keyboard.row(edit_surname_button)
